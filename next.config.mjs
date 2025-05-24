@@ -11,7 +11,7 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
   },
   async headers() {
     return [
@@ -40,6 +40,11 @@ const nextConfig = {
         destination: "https://api.openai.com/v1/audio/transcriptions",
       },
     ];
+  },
+  staticPageGenerationTimeout: 120,
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
   },
 };
 
