@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Clinic {
+  id         String      @id @default(uuid())
+  name       String
+  assistants Assistant[]
+}
+
+model Assistant {
+  id       String @id @default(uuid())
+  name     String
+  clinicId String
+  clinic   Clinic @relation(fields: [clinicId], references: [id])
+  calls    Call[]
+}
+
+model Call {
+  id             String          @id
+  assistantId    String
+  startTime      DateTime
+  endTime        DateTime
+  duration       Float
+  recordingUrl   String
+  createdAt      DateTime        @default(now())
+  assistant      Assistant       @relation(fields: [assistantId], references: [id])
+  evaluations    Evaluation[]
+  llmEvaluations LLM_Evaluation?
+}
+
+model Evaluation {
+  id           String    @id @default(uuid())
+  callId       String
+  reviewerName String
+  outcome      Boolean
+  feedback     String
+  callType     CallType?
+  tags         String[]
+  createdAt    DateTime  @default(now())
+  call         Call      @relation(fields: [callId], references: [id])
+}
+
+model LLM_Evaluation {
+  id                  String    @id @unique @default(uuid())
+  callId              String    @unique
+  score               Int
+  outcome             Boolean
+  llmFeedback         String
+  callType            CallType?
+  tags                String[]
+  sentiment           String?
+  protocolAdherence   Int?
+  callTypeConfidence  Float?
+  outcomeConfidence   Float?
+  sentimentConfidence Float?
+  approved            Boolean?
+  reviewerName        String?
+  reviewComment       String?
+  createdAt           DateTime  @default(now())
+  call                Call      @relation(fields: [callId], references: [id])
+}
+
+enum CallType {
+  APPOINTMENT_ADJUSTMENT
+  NEW_CLIENT_SPANISH
+  GENERAL_INQUIRY
+  GENERAL_INQUIRY_TRANSFER
+  TIME_SENSITIVE
+  NEW_CLIENT_ENGLISH
+  LOOKING_FOR_SOMEONE
+  MISSED_CALL
+  MISCALANEOUS
+  BILLING
+}
